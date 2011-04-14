@@ -1,0 +1,156 @@
+digraph MyDG {
+    aa [
+        fontsize = 8,
+        label = aa
+    ]
+
+    a [
+        fontsize = 8,
+        label = a
+    ]
+
+    bc [
+        fontsize = 8,
+        label = bc
+    ]
+
+    bbb [
+        fontsize = 8,
+        label = bbb
+    ]
+
+    b [
+        fontsize = 8,
+        label = b
+    ]
+
+    aaa [
+        fontsize = 8,
+        label = aaa
+    ]
+
+    "" [
+        fontsize = 8,
+        label = ""
+    ]
+
+    ba [
+        fontsize = 8,
+        label = ba
+    ]
+
+    ab [
+        fontsize = 8,
+        label = ab
+    ]
+
+    ac [
+        fontsize = 8,
+        label = ac
+    ]
+
+    bb [
+        fontsize = 8,
+        label = bb
+    ]
+
+    bcc [
+        fontsize = 8,
+        label = bcc
+    ]
+
+    cc [
+        fontsize = 8,
+        label = cc
+    ]
+
+    c [
+        fontsize = 8,
+        label = c
+    ]
+
+    d [
+        fontsize = 8,
+        label = d
+    ]
+
+    aa -> a [
+        fontsize = 8
+    ]
+
+    a -> aa [
+        fontsize = 8
+    ]
+
+    bc -> bbb [
+        fontsize = 8
+    ]
+
+    bc -> b [
+        fontsize = 8
+    ]
+
+    bbb -> bb [
+        fontsize = 8
+    ]
+
+    bbb -> aaa [
+        fontsize = 8
+    ]
+
+    b -> "" [
+        fontsize = 8
+    ]
+
+    aaa -> aa [
+        fontsize = 8
+    ]
+
+    "" -> "" [
+        fontsize = 8
+    ]
+
+    "" -> d [
+        fontsize = 8
+    ]
+
+    ba -> b [
+        fontsize = 8
+    ]
+
+    ba -> ab [
+        fontsize = 8
+    ]
+
+    ab -> a [
+        fontsize = 8
+    ]
+
+    ab -> aaa [
+        fontsize = 8
+    ]
+
+    ab -> bb [
+        fontsize = 8
+    ]
+
+    ac -> a [
+        fontsize = 8
+    ]
+
+    bb -> b [
+        fontsize = 8
+    ]
+
+    bcc -> bc [
+        fontsize = 8
+    ]
+
+    cc -> c [
+        fontsize = 8
+    ]
+
+    d -> "" [
+        fontsize = 8
+    ]
+}
