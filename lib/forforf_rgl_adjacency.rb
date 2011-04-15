@@ -17,7 +17,8 @@ require 'json'
 # but it is the top most parent of the Graph. To avoid this, I use source and target
 # for graph operations.
 
-class MyDG < RGL::DirectedAdjacencyGraph
+#class MyDG < RGL::DirectedAdjacencyGraph
+module ForforfRglAdjacency
 
   def alias_nils(nil_term = :zzznull)
     edges = self.edge_array
@@ -175,4 +176,8 @@ class MyDG < RGL::DirectedAdjacencyGraph
     end
     uniq_dgs.uniq
   end
+end
+
+class MyDG < RGL::DirectedAdjacencyGraph
+  include ForforfRglAdjacency
 end
