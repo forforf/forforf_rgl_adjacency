@@ -1,6 +1,39 @@
 = forforf_rgl_adjacency
 
-Description goes here.
+== This is a module that adds functionality to the core rgl/adjacency class
+Functionality Added
+
+* Ability to alias nils in the graph
+  * #alias_nils(nil_term = :zzznull) will replace any nils in the graph with
+    a user provided term (default is :zzznull for alphabetical reasons)
+  * overrides #hash and #eql? so that #eql? will return true if two graphs
+    have identical set of edges.
+  * provides an #indegree method. Its a bit of a hack, as it essentially reverses
+    the graph and then calculates #out_degree on the reversed graph. I'm fairly
+    certain this results in a correct answer for directed graphs, but not 100% 
+    positive.
+  * #roots method to find vertices with no sources (i.e., no parents or
+    equivalently an in degree of 0)
+  * #best_top_vertices method to find the vertices with the most descendants.
+    Its vertices, not vertex because multiple vertices could be tied for the
+    number of descendants.
+  * #edge_array returns an array of edges interestingly enough
+  * #source_vertices returns the parent vertices of the current vertex
+  * #connected_to? determines if the current graph (self) has any vertices in
+    common with another graph.
+  * #merge will merge the current directed graph with another directed graph.
+  * connected_edges? A test to determine if edges connect to each other. For
+    Example edge [:a, :b] is connected to [:b, ;c].
+  * #atomic_graphs returns an array of digraphs that are formed by the edges of
+    the current graph (i.e. each digraph returned has two vertices and one edge).
+    I wish I could have thought of a better name (atomic has multiple meanins)
+  * #find_connected_graphs will find all connected graphs and merge them together
+    into a common graph. Returns an array of unique graphs.
+
+  
+
+    
+
 
 == Contributing to forforf_rgl_adjacency
  
