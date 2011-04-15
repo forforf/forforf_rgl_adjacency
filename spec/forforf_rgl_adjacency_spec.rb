@@ -28,9 +28,13 @@ module DAGSpecH
 
    CGTopNodes = [:ba, :ac, :bcc, :cc] 
    CGBestTopNodes = [:bcc] #underneath :bcc => :bc, :bbb, :aaa, :aa, :a, :bb, :b, nil, :d 
-   SimpleGraph = [ [:a, :aa], [:a, :ab], [:b, :ba], [:b, :bc] ]
-   SimpleGraphCopy = [ [:a, :aa], [:a, :ab], [:b, :ba], [:b, :bc] ]
-   SimpleGraphReverse = [ [:aa, :a], [:ab, :a], [:ba, :b], [:bc, :b] ]
+   SimpleGraph = [ [:a, :aa], [:a, :ab], [:b, :ba], [:b, :bb] ]
+   SimpleGraphCopy = [ [:a, :aa], [:a, :ab], [:b, :ba], [:b, :bb] ]
+   SimpleGraphReverse = [ [:aa, :a], [:ab, :a], [:ba, :b], [:bb, :b] ]
+   ConnectRootsGraph = [[:e, :bcc], [:e, :cc], [:e, :ba], [:e, :ac] ]
+   ConnectLoopGraph = [[:d, :f], [:a, :f], [:f, :bcc] ]
+   UnconnectedGraph = [[:x, :xx], [:z, :zz]]
+   NilGraph = [[nil, nil]]
 end
 
 describe "ForforfRglAdjacency" do
@@ -49,10 +53,25 @@ describe "ForforfRglAdjacency" do
     @rgl_simple_copy = @simple_copy.flatten
     @simple_reverse = SimpleGraphReverse
     @rgl_simple_reverse = @simple_reverse.flatten
+    @connect_roots = ConnectRootsGraph
+    @rgl_connect_roots = @connect_roots.flatten
+    @connect_loop = ConnectLoopGraph
+    @rgl_connect_loop = @connect_loop.flatten
+    @unconnected_graph = UnconnectedGraph
+    @rgl_unconnected_graph = @unconnected_graph.flatten
+    @nil_graph = NilGraph
+    @rgl_nil_graph = @nil_graph.flatten
   end
 
   it "should initialize" do
     MyDG[*@rgl_complex].should_not == nil
+  end
+
+  it "should be able to alias nils" do
+    dg_w_nils = MyDG[*@rgl_complex]
+    dg_w_nils.edge_array.flatten.should include nil
+    dg = dg_w_nils.alias_nils
+    dg.edge_array.flatten.should_not include nil
   end
 
   it "tests for equality" do
@@ -84,14 +103,14 @@ describe "ForforfRglAdjacency" do
     out_degrees.should == @complex_outdegree
   end
 
-  it "finds nodes with no parents" do
+  it "find root vertices (vertices with no parents)" do
     dg = MyDG[*@rgl_complex]
-    dg.nodes_with_no_parents.should == @complex_top_nodes
+    dg.roots.should == @complex_top_nodes
   end
 
-  it "finds the best top nodes (nodes with th most children)" do
+  it "finds the best top vertices (vertices with the most total descendants)" do
     dg = MyDG[*@rgl_complex]
-    dg.best_top_nodes.should == @complex_best_top_nodes
+    dg.best_top_vertices.should == @complex_best_top_nodes
   end
 
   it "provides its edges as a nested array" do
@@ -106,9 +125,104 @@ describe "ForforfRglAdjacency" do
     dg_edges.sort.should == complex_edges.sort
   end
 
-  it "isn't complete yet" do
-    fail "need to add tests for 6 more methods"
+  it "finds the source (parent) vertices" do
+    dg = MyDG[*@rgl_complex]
+    dg.source_vertices(:b).sort.should == [:bc, :ba, :bb].sort
+    dg.source_vertices(nil).should == [:b, nil, :d]
+    dg.source_vertices(:bcc).should == []
+    dg.source_vertices(:a).sort.should == [:aa, :ac, :ab].sort
+    dg.source_vertices(:d).should == [nil]
   end
 
-  
+  it "determines if digraphs are connected" do
+    base_dg = MyDG[*@rgl_complex]
+    conn_root_dg = MyDG[*@rgl_connect_roots]
+    unconn_dg = MyDG[*@rgl_unconnected_graph]
+    nil_dg = MyDG[*@rgl_nil_graph]
+
+    base_dg.connected_to?(conn_root_dg).should == true
+    base_dg.connected_to?(unconn_dg).should == false
+    base_dg.connected_to?(nil_dg).should == true 
+  end
+
+  it "merges with other graphs" do
+    base_dg = MyDG[*@rgl_complex]
+    conn_root_dg = MyDG[*@rgl_connect_roots]
+    conn_loop_dg = MyDG[*@rgl_connect_loop]
+    unconn_dg = MyDG[*@rgl_unconnected_graph]
+    
+    merge_new_root_dg = base_dg.merge(conn_root_dg)
+    merge_new_root_dg.roots.should == [:e]
+
+    merge_new_loop_dg = base_dg.merge(conn_loop_dg)
+    merge_new_loop_dg.adjacent_vertices(:d).should include :f
+    merge_new_loop_dg.adjacent_vertices(:f).should include :bcc
+    merge_new_loop_dg.adjacent_vertices(:a).should include :f
+    
+    merge_uncon_dg = base_dg.merge(unconn_dg)
+    merge_uncon_dg.vertices.should include :bb
+    merge_uncon_dg.vertices.should include :cc
+    merge_uncon_dg.vertices.should include :x
+  end
+
+  it "detects if two edges are connected" do
+    base_edge = [:g, :h]
+    conn_source = [:g, :i]
+    conn_target = [:j, :h]
+    linked_edge = [:h, :n]
+    dup_edge = [:g, :h]
+    unconn_edge = [:k, :m]
+    nil_base = [nil, nil]
+    nil_conn = [:o, nil]
+    
+    some_dg = MyDG[*[]] #this method doesn't rely on any dg structures
+    some_dg.connected_edges?(base_edge, conn_source).should == [:g, :h, :i]
+    some_dg.connected_edges?(base_edge, conn_target).should == [:g, :h, :j]
+    some_dg.connected_edges?(base_edge, linked_edge).should == [:g, :h, :n]
+    some_dg.connected_edges?(base_edge, dup_edge).should == [:g, :h]
+    some_dg.connected_edges?(base_edge, unconn_edge).should == nil
+    some_dg.connected_edges?(nil_base, nil_conn).should == [nil, :o]
+  end
+
+  it "breaks a graph down into its atomic digraphs" do
+    base_dg = MyDG[*@rgl_simple]
+    baby_dgs = base_dg.atomic_graphs
+
+    baby_edge_matcher = [[:a, :aa], [:a, :ab], [:b, :ba], [:b, :bb]]
+    baby_dgs.size.should == 4
+    baby_dgs.each do |dg|
+      dg.size.should == 2
+      dg_edge = dg.edge_array.flatten #or could have used #first
+      baby_edge_matcher.should include dg_edge
+      baby_edge_matcher.delete(dg_edge) #makes sure there are no duplicates
+    end
+  end
+
+  it "can find connected graphs" do
+    #simple default test
+    base_dg = MyDG[*@rgl_simple]
+    base_baby_graphs = base_dg.find_connected_graphs
+    base_baby_graphs.size.should == 2
+    new_graph = base_baby_graphs.first.merge(base_baby_graphs.last)
+    new_graph.should == base_dg
+
+    #complex default test
+    complex_dg = MyDG[*@rgl_complex] 
+    complex_baby_graphs = complex_dg.find_connected_graphs
+
+    new_complex_graph = complex_baby_graphs.inject(MyDG[*[]]) {|memo, dg| memo.merge(dg)}
+    new_complex_graph.should == complex_dg
+
+    #non-default test
+    simp_dg = MyDG[*@rgl_simple]
+    baby_dgs = simp_dg.atomic_graphs
+    baby_dgs.size.should == 4
+
+    some_dg = MyDG[*[]]
+    merged_graphs = some_dg.find_connected_graphs(baby_dgs)
+    merged_graphs.size.should == 2
+    
+    full_graph = merged_graphs.first.merge(merged_graphs.last)
+    full_graph.should == simp_dg 
+  end
 end
