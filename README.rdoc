@@ -8,7 +8,7 @@ Functionality Added
     a user provided term (default is :zzznull for alphabetical reasons)
   * overrides #hash and #eql? so that #eql? will return true if two graphs
     have identical set of edges.
-  * provides an #indegree method. Its a bit of a hack, as it essentially reverses
+  * provides an #in_degree method. Its a bit of a hack, as it essentially reverses
     the graph and then calculates #out_degree on the reversed graph. I'm fairly
     certain this results in a correct answer for directed graphs, but not 100% 
     positive.
