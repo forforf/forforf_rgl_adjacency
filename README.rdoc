@@ -3,7 +3,7 @@
 == This is a module that adds functionality to the core rgl/adjacency class
 Functionality Added
 
-* Ability to alias nils in the graph
+  * Ability to alias nils in the graph
   * #alias_nils(nil_term = :zzznull) will replace any nils in the graph with
     a user provided term (default is :zzznull for alphabetical reasons)
   * overrides #hash and #eql? so that #eql? will return true if two graphs
